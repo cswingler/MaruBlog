@@ -46,51 +46,12 @@ class MaruBlog(callbacks.Plugin):
     will get the most recent post.
     """
     pass
-
-    # This code is known working, but doesn't handle CRs.
-#     def maru(self, irc, msg, args, channel, num):
-#         """ [post number]
-# 
-#         Prints a blog post to the channel.
-#         """
-#         m = MaruGet.MaruBlog(num)
-#         r = m.ircContent()
-#         r = r.replace("\n"," ")
-#         self.log.info("Maruing %q in %s due to %s.",
-#                 r, channel, msg.prefix)
-#         self.log.info("Type: %s ", type(r))
-#         r = unicode(r).encode("utf-8")
-#         irc.queueMsg(ircmsgs.privmsg(channel, r))
-#         irc.noReply()
-#     maru = wrap(maru, ['inChannel', 'int'])
-# 
-    # Woo! Now, just to get it to accept no arg.
-    def maru(self, irc, msg, args, channel, num):
+ 
+    def maru(self, irc, msg, args, channel, num=None):
         """ [<post number>]
 
-        Prints a blog post to the channel.
-        """
-        m = MaruGet.MaruBlog(num)
-        r = m.ircContent()
-        self.log.info("Maruing %q in %s due to %s.",
-                r, channel, msg.prefix)
-        self.log.info("Type: %s ", type(r))
-        r = unicode(r).encode("utf-8")
-        #r = r.split("\n")
-        maruList = list()
-        for maruLine in r.split('\n'):
-            try:
-                maruList.append(unicode(maruLine).encode("ascii"))
-            except UnicodeDecodeError:
-                pass
-        for line in maruList:
-            irc.queueMsg(ircmsgs.privmsg(channel, line))
-            irc.noReply()
-    maru = wrap(maru, ['inChannel', optional('int')])
-
-    def randmaru(self, irc, msg, args, channel, num=None):
-        """
-        Prints a blog post to the channel at random.
+        Prints a blog post to the channel.  If no post number is given,
+        returns a random entry.
         """
         if(num == None):
             self.log.info("Randomly getting a maru post:")
@@ -98,19 +59,17 @@ class MaruBlog(callbacks.Plugin):
             postNum = randint(2,latestM.latestPost())
         else:
             postNum = num
-        self.log.info("Getting post number: " + str(postNum))
+        self.log.info("Getting maru post number: " + str(postNum))
         m = MaruGet.MaruBlog(postNum)
         r = m.ircContent()
-        self.log.info("Maruing %q in %s due to %s.",
+        self.log.debug("Maruing %q in %s due to %s.",
                 r, channel, msg.prefix)
-        self.log.info("Type: %s ", type(r))
+        self.log.debug("Type: %s ", type(r))
         r = unicode(r).encode("utf-8")
-        #r = r.split("\n")
         maruList = list()
 
         irc.queueMsg(ircmsgs.privmsg(channel, "Maru blog entry #" +\
             str(postNum) +" (" + m.maruUrl + ")" +":"))
-        #irc.noReply()
         for maruLine in r.split('\n'):
             try:
                 maruList.append(unicode(maruLine).encode("ascii"))
@@ -118,11 +77,18 @@ class MaruBlog(callbacks.Plugin):
                 pass
         for line in maruList:
             irc.queueMsg(ircmsgs.privmsg(channel, line))
-            #irc.noReply()
         irc.noReply()
-    randmaru = wrap(randmaru, ['inChannel', optional('int')])
+    maru = wrap(maru, ['inChannel', optional('int')])
 
-
+    def randmaru(self, irc, msg, args, channel):
+        """
+        Deprecated.  Use maru with no parameters instead.
+        """
+        irc.queueMsg(ircmsgs.privmsg(channel, "'randmaru' will be " +\
+                "abolished. Use the 'maru' with no parameters " +\
+                "instead of the circle. Mew."))
+        irc.noReply()
+    randmaru = wrap(randmaru, ['inChannel'])
 
     def hug(self, irc, msg, args, channel):
         """
@@ -134,11 +100,6 @@ class MaruBlog(callbacks.Plugin):
         return
     hug = wrap(hug, ['inChannel'])
 
-
-
-
-
 Class = MaruBlog
-
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=79:
