@@ -61,8 +61,11 @@ class MaruBlog:
 	"""
 	Gets the url and stores it in a urllib2 object
 	"""
-	self.urlFile = urllib2.urlopen(self.maruUrl)
-	return
+        try:
+            self.urlFile = urllib2.urlopen(self.maruUrl)
+        except HTTPError:
+            self.urlFile = None
+        return
 
     def __readBody(self):
 	"""
@@ -110,12 +113,15 @@ class MaruBlog:
 	ircString = unicode()
 	try:
 	    for item in self.entryBodyHtml:
-
 		if (type(item) == Tag):
+                    if(item.getText() != ''):
+                        # Some link text
+                        ircString = ircString.rstrip('\n')
+                        ircString += item.getText() + u" "
+                        ircString += u"< " + item.get("href") + u" >"
 		    if(item.find('img') != None):
 			# Image.
 			ircString += item.find('img')['src'] + u"\n"
-
 		    elif(item.find('embed') != None):
 			# Youtube video.
 			ircString += item.find('embed')['src'] + u"\n"
@@ -142,3 +148,6 @@ class MaruBlog:
 		end = pos.end()
 		return int(url[start:end])
 	return None
+
+# Yes, I know this is goofy, I'm too lazy to fix it.
+# vim: set swiftwidth=4 tabstop=8
