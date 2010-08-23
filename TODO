@@ -1,0 +1,7 @@
+=== TODO LIST ===
+
+* Hang on to the latestPost() value for at least an hour at a time
+* When returning a blog post randomly, and finding out that the post doesn't exist,
+	randomly choose a different one
+* Add support for mouseover images
+* Fix handling of euc-jp spaces in otherwise ASCII strings
